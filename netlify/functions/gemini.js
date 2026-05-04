@@ -1,12 +1,10 @@
 exports.handler = async function(event, context) {
-  // Autoriser uniquement les POST
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  // Clé API stockée en variable d'environnement Netlify (jamais exposée)
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-  if (!GEMINI_API_KEY) {
+  const GROQ_API_KEY = process.env.GROQ_API_KEY;
+  if (!GROQ_API_KEY) {
     return { statusCode: 500, body: JSON.stringify({ error: 'Clé API manquante côté serveur.' }) };
   }
 
@@ -22,19 +20,27 @@ exports.handler = async function(event, context) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Prompt manquant.' }) };
   }
 
-  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-
   try {
-    const response = await fetch(GEMINI_URL, {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_API_KEY}`
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 1500,
-          responseMimeType: "application/json"
-        }
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          {
+            role: 'system',
+            content: 'Tu es expert en musicologie appliquée aux espaces commerciaux. Tu réponds UNIQUEMENT en JSON valide, sans markdown, sans texte avant ou après.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1500
       })
     });
 
@@ -44,11 +50,11 @@ exports.handler = async function(event, context) {
       return {
         statusCode: response.status,
         headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ error: data.error?.message || 'Erreur Gemini.' })
+        body: JSON.stringify({ error: data.error?.message || 'Erreur Groq.' })
       };
     }
 
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const text = data.choices?.[0]?.message?.content || '';
 
     return {
       statusCode: 200,
