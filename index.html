@@ -16,16 +16,37 @@
 html{scroll-behavior:smooth}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;overflow-x:hidden}
 #canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.4}
+
+/* ── LOGIN PAGE ── */
+#login-page{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+#login-page.hidden{display:none}
+.login-box{background:rgba(0,20,12,0.9);border:1px solid var(--glass-border);border-radius:24px;padding:48px 40px;text-align:center;width:100%;max-width:400px;backdrop-filter:blur(20px);box-shadow:0 0 60px rgba(0,255,136,0.08)}
+.login-logo{font-family:'Orbitron',monospace;font-size:26px;font-weight:900;color:var(--green);text-shadow:0 0 20px rgba(0,255,136,0.5);margin-bottom:6px;letter-spacing:0.05em}
+.login-sub{font-size:12px;color:var(--gray);margin-bottom:36px;letter-spacing:0.05em}
+.login-label{font-size:10px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:0.15em;display:block;text-align:left;margin-bottom:8px}
+.login-input-wrap{position:relative;margin-bottom:10px}
+.login-input{width:100%;background:rgba(0,0,0,0.5);border:1px solid var(--glass-border);border-radius:10px;padding:14px 44px 14px 16px;font-size:14px;color:var(--white);font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s,box-shadow 0.2s;letter-spacing:0.05em}
+.login-input:focus{border-color:var(--green);box-shadow:0 0 15px rgba(0,255,136,0.15)}
+.login-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--gray);cursor:pointer;font-size:16px;padding:4px}
+.login-eye:hover{color:var(--green)}
+.login-btn{width:100%;margin-top:20px;padding:15px;background:transparent;border:2px solid var(--green);border-radius:10px;font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--green);letter-spacing:0.15em;cursor:pointer;transition:all 0.3s;text-transform:uppercase}
+.login-btn:hover{background:rgba(0,255,136,0.08);box-shadow:var(--glow-strong)}
+.login-btn:disabled{opacity:0.5;cursor:not-allowed}
+.login-error{color:#ff6b6b;font-size:12px;margin-top:10px;min-height:18px;display:block}
+.login-lock{font-size:40px;margin-bottom:20px}
+
+/* ── APP ── */
 .app{position:relative;z-index:1}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 40px;border-bottom:1px solid var(--glass-border);background:rgba(5,10,14,0.8);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
 .logo{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;color:var(--green);text-shadow:0 0 12px rgba(0,255,136,0.4);letter-spacing:0.05em}
-.topbar-badge{font-family:'Orbitron',monospace;font-size:10px;color:var(--green);border:1px solid var(--glass-border);padding:4px 12px;border-radius:20px;letter-spacing:0.1em;background:var(--glass);box-shadow:var(--glow)}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-badge{font-family:'Orbitron',monospace;font-size:10px;color:var(--green);border:1px solid var(--glass-border);padding:4px 12px;border-radius:20px;letter-spacing:0.1em;background:var(--glass)}
+.btn-logout{font-family:'Orbitron',monospace;font-size:9px;color:var(--gray);border:1px solid rgba(107,138,122,0.3);padding:4px 10px;border-radius:20px;background:transparent;cursor:pointer;transition:all 0.2s;letter-spacing:0.08em}
+.btn-logout:hover{color:var(--green);border-color:var(--green)}
 .hero{text-align:center;padding:80px 40px 60px}
 .hero-tag{font-family:'Orbitron',monospace;font-size:11px;color:var(--green);letter-spacing:0.2em;margin-bottom:20px;text-transform:uppercase}
 .hero-title{font-family:'Orbitron',monospace;font-size:clamp(28px,5vw,52px);font-weight:900;line-height:1.1;margin-bottom:20px;background:linear-gradient(135deg,var(--green),var(--green3),var(--green2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 200%;animation:gradShift 4s ease infinite}
 .hero-sub{font-size:16px;color:var(--gray);max-width:560px;margin:0 auto;line-height:1.7}
-.powered-badge{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:6px 16px;border:1px solid rgba(66,133,244,0.4);border-radius:20px;background:rgba(66,133,244,0.06);font-size:12px;color:#7ab4f5}
-.powered-badge span{font-weight:600}
 @keyframes gradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 .main{max-width:900px;margin:0 auto;padding:0 24px 80px}
 .section-tag{display:flex;align-items:center;gap:12px;margin-bottom:20px;margin-top:40px}
@@ -68,7 +89,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--white);min-
 .result-header{text-align:center;margin-bottom:32px}
 .result-title{font-family:'Orbitron',monospace;font-size:22px;font-weight:700;color:var(--green);margin-bottom:8px;text-shadow:0 0 20px rgba(0,255,136,0.4)}
 .result-sub{font-size:14px;color:var(--gray);max-width:600px;margin:0 auto;line-height:1.6}
-.gemini-mention{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:11px;color:#7ab4f5;opacity:0.7}
 .score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
 .score-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:16px;text-align:center}
 .score-val{font-family:'Orbitron',monospace;font-size:28px;font-weight:700;color:var(--green);text-shadow:0 0 15px rgba(0,255,136,0.4)}
@@ -100,22 +120,43 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--white);min-
   .form-grid{grid-template-columns:1fr}
   .form-group.full{grid-column:1}
   .main{padding:0 14px 60px}
+  .login-box{padding:36px 24px;margin:16px}
 }
 </style>
 </head>
 <body>
 <canvas id="canvas"></canvas>
-<div class="app">
+
+<!-- PAGE DE CONNEXION -->
+<div id="login-page">
+  <div class="login-box">
+    <div class="login-lock">🎵</div>
+    <div class="login-logo">MOODSTREAM.AI</div>
+    <div class="login-sub">Accès sécurisé — Agenda Musical Intelligent</div>
+    <label class="login-label">Mot de passe</label>
+    <div class="login-input-wrap">
+      <input class="login-input" type="password" id="login-input" placeholder="Entrez le mot de passe..." onkeydown="if(event.key==='Enter')doLogin()"/>
+      <button class="login-eye" onclick="togglePwd()" id="eye-btn">👁️</button>
+    </div>
+    <span class="login-error" id="login-error"></span>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">🔓 ACCÉDER</button>
+  </div>
+</div>
+
+<!-- APP PRINCIPALE -->
+<div class="app" id="main-app" style="display:none">
   <div class="topbar">
     <div class="logo">MOODSTREAM.AI</div>
-    <div class="topbar-badge">GEMINI 2.0 FLASH</div>
+    <div class="topbar-right">
+      <div class="topbar-badge">GEMINI 2.0 FLASH</div>
+      <button class="btn-logout" onclick="doLogout()">⎋ DÉCONNEXION</button>
+    </div>
   </div>
 
   <div class="hero">
     <div class="hero-tag">⚡ Powered by Google Gemini AI</div>
     <div class="hero-title">Agenda Musical<br/>Intelligent</div>
     <div class="hero-sub">Décrivez votre établissement et générez un programme musical optimisé par IA, adapté à chaque moment de votre journée.</div>
-    <div class="powered-badge">🤖 <span>Propulsé par Gemini 2.0 Flash</span> — Google AI</div>
   </div>
 
   <div class="main">
@@ -242,7 +283,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--white);min-
       <div class="result-header">
         <div class="result-title" id="result-title">AGENDA MUSICAL</div>
         <div class="result-sub" id="result-sub"></div>
-        <div class="gemini-mention">🤖 Généré par Gemini 2.0 Flash</div>
       </div>
       <div class="score-grid" id="score-grid"></div>
       <div class="agenda-grid" id="agenda-grid"></div>
@@ -255,7 +295,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--white);min-
 </div>
 
 <script>
-/* ── Canvas particles ── */
+/* ── Canvas ── */
 const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
 let particles=[];
 function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
@@ -284,7 +324,61 @@ function drawParticles(){
 resizeCanvas();initParticles();drawParticles();
 window.addEventListener('resize',()=>{resizeCanvas();initParticles();});
 
-/* ── UI helpers ── */
+/* ── Auth ── */
+let sessionToken = sessionStorage.getItem('ms_token');
+if(sessionToken){ showApp(); }
+
+async function doLogin(){
+  const pwd = document.getElementById('login-input').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-error');
+  if(!pwd){ err.textContent='Veuillez entrer le mot de passe.'; return; }
+  btn.disabled=true;
+  btn.textContent='Vérification...';
+  err.textContent='';
+  try{
+    const res = await fetch('/.netlify/functions/auth',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({password:pwd})
+    });
+    const data = await res.json();
+    if(res.ok && data.token){
+      sessionStorage.setItem('ms_token', data.token);
+      sessionToken = data.token;
+      showApp();
+    } else {
+      err.textContent = '❌ Mot de passe incorrect.';
+      document.getElementById('login-input').value='';
+    }
+  } catch(e){
+    err.textContent = '⚠️ Erreur de connexion. Réessayez.';
+  } finally {
+    btn.disabled=false;
+    btn.textContent='🔓 ACCÉDER';
+  }
+}
+
+function showApp(){
+  document.getElementById('login-page').classList.add('hidden');
+  document.getElementById('main-app').style.display='block';
+}
+
+function doLogout(){
+  sessionStorage.removeItem('ms_token');
+  sessionToken=null;
+  document.getElementById('login-page').classList.remove('hidden');
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('login-input').value='';
+  document.getElementById('login-error').textContent='';
+}
+
+function togglePwd(){
+  const inp=document.getElementById('login-input');
+  inp.type = inp.type==='password' ? 'text' : 'password';
+}
+
+/* ── UI ── */
 const intensiteLabels=['','Très doux','Doux','Modéré','Fort','Très fort'];
 function updateSlider(el){
   document.getElementById('intensite-val').textContent=intensiteLabels[el.value];
@@ -294,22 +388,17 @@ function updateSlider(el){
 updateSlider(document.getElementById('intensite'));
 function toggleChip(el){el.classList.toggle('sel');}
 function getChips(id){return[...document.querySelectorAll(`#${id} .chip.sel`)].map(c=>c.textContent).join(', ');}
-function showError(msg){
-  const el=document.getElementById('error-panel');
-  el.textContent='⚠️ '+msg;
-  el.classList.add('show');
-}
+function showError(msg){const el=document.getElementById('error-panel');el.textContent='⚠️ '+msg;el.classList.add('show');}
 function hideError(){document.getElementById('error-panel').classList.remove('show');}
 
 const MUSIC_ICONS={'Jazz':'🎷','Lounge':'🛋️','Pop':'🎤','Électronique':'🎛️','House':'🏠','R&B / Soul':'🎸','Classique':'🎻','Bossa Nova':'🌴','Indie':'🎵','Rock':'🎸','Hip-Hop':'🎧','Ambient':'🌊','World Music':'🌍','Funk':'🕺','Deep House':'🎚️','Nu Jazz':'🎺','Chillout':'😌','Downtempo':'🌙'};
 
-/* ── Main generation ── */
+/* ── Generate ── */
 async function generateReport(){
   hideError();
   const secteur=document.getElementById('secteur').value;
   const typeEtab=document.getElementById('type-etab').value.trim();
   if(!secteur&&!typeEtab){showError("Veuillez indiquer votre secteur ou type d'établissement.");return;}
-
   const btn=document.getElementById('btn-gen');
   btn.disabled=true;
   document.getElementById('loading').classList.add('show');
@@ -357,21 +446,15 @@ Retourne UNIQUEMENT du JSON valide sans markdown :
 Génère 3 à 4 périodes adaptées aux horaires.`;
 
   try{
-    /* Appel via la Netlify Function — la clé API reste côté serveur */
     const response=await fetch('/.netlify/functions/gemini',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({prompt})
+      body:JSON.stringify({prompt, token: sessionToken})
     });
-
     const result=await response.json();
     clearInterval(interval);
     document.getElementById('progress-bar').style.width='100%';
-
-    if(!response.ok||result.error){
-      throw new Error(result.error||'Erreur lors de la génération.');
-    }
-
+    if(!response.ok||result.error) throw new Error(result.error||'Erreur lors de la génération.');
     await new Promise(r=>setTimeout(r,400));
     const text=result.result;
     const clean=text.replace(/```json|```/g,'').trim();
@@ -379,7 +462,6 @@ Génère 3 à 4 périodes adaptées aux horaires.`;
     showResult(parsed,data);
   }catch(e){
     clearInterval(interval);
-    console.error(e);
     showError(e.message||'Erreur lors de la génération. Réessaie.');
   }finally{
     btn.disabled=false;
@@ -396,7 +478,6 @@ function showResult(data,input){
     ['Expérience client',data.score_experience,'⭐'],
     ['Périodes générées',(data.periodes||[]).length,'📅'],
   ].map(([label,val,icon])=>`<div class="score-card"><div style="font-size:22px;margin-bottom:6px">${icon}</div><div class="score-val">${typeof val==='number'&&val<=100?val+'%':val}</div><div class="score-label">${label}</div></div>`).join('');
-
   const emojis=['🌅','☀️','🌆','🌙'];
   document.getElementById('agenda-grid').innerHTML=(data.periodes||[]).map((p,i)=>{
     const icon=MUSIC_ICONS[p.type_musique]||'🎵';
@@ -418,7 +499,6 @@ function showResult(data,input){
       ${p.raison?`<div style="margin-top:12px;font-size:12px;color:#6b8a7a;font-style:italic">💡 ${p.raison}</div>`:''}
     </div>`;
   }).join('');
-
   document.getElementById('result-panel').classList.add('show');
   document.getElementById('result-panel').scrollIntoView({behavior:'smooth'});
   window._reportData=data;
@@ -428,9 +508,7 @@ function copyReport(){
   if(!window._reportData)return;
   const d=window._reportData;
   let text=`AGENDA MUSICAL — ${d.etablissement}\n${d.resume}\n\n`;
-  (d.periodes||[]).forEach(p=>{
-    text+=`${p.horaire} — ${p.nom}\nAmbiance : ${p.mood}\n${p.description}\nMusique conseillée : ${p.type_musique} (${p.bpm})\n${p.raison}\n\n`;
-  });
+  (d.periodes||[]).forEach(p=>{text+=`${p.horaire} — ${p.nom}\nAmbiance : ${p.mood}\n${p.description}\nMusique conseillée : ${p.type_musique} (${p.bpm})\n${p.raison}\n\n`;});
   navigator.clipboard.writeText(text).then(()=>alert('Rapport copié !'));
 }
 
