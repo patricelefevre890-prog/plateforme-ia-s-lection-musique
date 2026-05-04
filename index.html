@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Moodstream.AI — Agenda Musical Intelligent</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050a0e;--green:#00ff88;--green2:#00e676;--green3:#00ffcc;
+  --white:#e8f0ec;--gray:#6b8a7a;
+  --glass:rgba(0,255,136,0.04);--glass-border:rgba(0,255,136,0.12);
+  --glow:0 0 20px rgba(0,255,136,0.3);--glow-strong:0 0 40px rgba(0,255,136,0.5);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;overflow-x:hidden}
+#canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.4}
+.app{position:relative;z-index:1}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 40px;border-bottom:1px solid var(--glass-border);background:rgba(5,10,14,0.8);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
+.logo{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;color:var(--green);text-shadow:0 0 12px rgba(0,255,136,0.4);letter-spacing:0.05em}
+.topbar-badge{font-family:'Orbitron',monospace;font-size:10px;color:var(--green);border:1px solid var(--glass-border);padding:4px 12px;border-radius:20px;letter-spacing:0.1em;background:var(--glass);box-shadow:var(--glow)}
+.hero{text-align:center;padding:80px 40px 60px}
+.hero-tag{font-family:'Orbitron',monospace;font-size:11px;color:var(--green);letter-spacing:0.2em;margin-bottom:20px;text-transform:uppercase}
+.hero-title{font-family:'Orbitron',monospace;font-size:clamp(28px,5vw,52px);font-weight:900;line-height:1.1;margin-bottom:20px;background:linear-gradient(135deg,var(--green),var(--green3),var(--green2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 200%;animation:gradShift 4s ease infinite}
+.hero-sub{font-size:16px;color:var(--gray);max-width:560px;margin:0 auto;line-height:1.7}
+.powered-badge{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:6px 16px;border:1px solid rgba(66,133,244,0.4);border-radius:20px;background:rgba(66,133,244,0.06);font-size:12px;color:#7ab4f5}
+.powered-badge span{font-weight:600}
+@keyframes gradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.main{max-width:900px;margin:0 auto;padding:0 24px 80px}
+.section-tag{display:flex;align-items:center;gap:12px;margin-bottom:20px;margin-top:40px}
+.section-tag-line{flex:1;height:1px;background:linear-gradient(90deg,var(--glass-border),transparent)}
+.section-tag-text{font-family:'Orbitron',monospace;font-size:10px;color:var(--green);letter-spacing:0.15em;white-space:nowrap}
+.glass-card{background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:20px;padding:28px;margin-bottom:16px;transition:border-color 0.3s,box-shadow 0.3s}
+.glass-card:hover{border-color:rgba(0,255,136,0.25);box-shadow:0 0 30px rgba(0,255,136,0.08)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:8px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:11px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:0.1em}
+.form-input,.form-select{background:rgba(0,0,0,0.4);border:1px solid var(--glass-border);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--white);font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s,box-shadow 0.2s;width:100%}
+.form-input:focus,.form-select:focus{border-color:var(--green);box-shadow:0 0 15px rgba(0,255,136,0.15)}
+.form-select option{background:#0d1a14;color:var(--white)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:6px 14px;border-radius:20px;border:1px solid var(--glass-border);background:var(--glass);color:var(--gray);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;user-select:none}
+.chip:hover{border-color:var(--green);color:var(--green)}
+.chip.sel{border-color:var(--green);background:rgba(0,255,136,0.12);color:var(--green);box-shadow:0 0 10px rgba(0,255,136,0.2)}
+.slider-wrap{display:flex;flex-direction:column;gap:8px}
+.slider-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--gray)}
+.slider{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--green);box-shadow:0 0 10px rgba(0,255,136,0.5);cursor:pointer}
+.btn-generate{width:100%;margin-top:32px;padding:18px;background:transparent;border:2px solid var(--green);border-radius:14px;font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:var(--green);letter-spacing:0.15em;cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden;text-transform:uppercase}
+.btn-generate::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,255,136,0.15),transparent);transition:left 0.5s}
+.btn-generate:hover{background:rgba(0,255,136,0.08);box-shadow:var(--glow-strong);transform:translateY(-2px)}
+.btn-generate:hover::before{left:100%}
+.btn-generate:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.error-panel{display:none;background:rgba(255,60,60,0.08);border:1px solid rgba(255,60,60,0.3);border-radius:14px;padding:18px 22px;margin-top:20px;color:#ff8080;font-size:13px;line-height:1.6}
+.error-panel.show{display:block}
+.loading-panel{display:none;background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:20px;padding:40px;text-align:center;margin-top:32px}
+.loading-panel.show{display:block;animation:fadeUp 0.4s ease}
+.loading-icon{font-size:40px;margin-bottom:16px;display:inline-block;animation:pulse 1.5s ease infinite}
+.loading-title{font-family:'Orbitron',monospace;font-size:16px;color:var(--green);margin-bottom:8px;letter-spacing:0.1em}
+.loading-sub{font-size:13px;color:var(--gray);margin-bottom:24px}
+.progress-bar-wrap{height:4px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden;margin-bottom:12px}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--green),var(--green3));border-radius:2px;width:0%;transition:width 0.3s ease;box-shadow:0 0 10px rgba(0,255,136,0.5)}
+.progress-steps{font-size:11px;color:var(--gray);font-family:'Orbitron',monospace;letter-spacing:0.08em}
+.result-panel{display:none;margin-top:32px}
+.result-panel.show{display:block;animation:fadeUp 0.5s ease}
+.result-header{text-align:center;margin-bottom:32px}
+.result-title{font-family:'Orbitron',monospace;font-size:22px;font-weight:700;color:var(--green);margin-bottom:8px;text-shadow:0 0 20px rgba(0,255,136,0.4)}
+.result-sub{font-size:14px;color:var(--gray);max-width:600px;margin:0 auto;line-height:1.6}
+.gemini-mention{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:11px;color:#7ab4f5;opacity:0.7}
+.score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+.score-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:16px;text-align:center}
+.score-val{font-family:'Orbitron',monospace;font-size:28px;font-weight:700;color:var(--green);text-shadow:0 0 15px rgba(0,255,136,0.4)}
+.score-label{font-size:11px;color:var(--gray);margin-top:4px;text-transform:uppercase;letter-spacing:0.06em}
+.agenda-grid{display:grid;gap:16px;margin-bottom:24px}
+.period-card{background:rgba(0,20,12,0.6);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;padding:24px;transition:all 0.3s;animation:fadeUp 0.5s ease both}
+.period-card:hover{border-color:rgba(0,255,136,0.3);box-shadow:0 0 25px rgba(0,255,136,0.08)}
+.period-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.period-time{font-family:'Orbitron',monospace;font-size:13px;color:var(--green);font-weight:600}
+.period-name{font-size:12px;color:var(--gray);text-transform:uppercase;letter-spacing:0.08em;margin-top:2px}
+.period-mood{font-size:15px;font-weight:600;color:var(--white);margin-bottom:8px}
+.period-desc{font-size:13px;color:var(--gray);line-height:1.6;margin-bottom:16px}
+.music-reco{display:flex;align-items:center;gap:14px;background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:14px 18px}
+.music-reco-icon{font-size:28px;flex-shrink:0}
+.music-reco-label{font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:3px}
+.music-reco-type{font-size:16px;font-weight:700;color:var(--white)}
+.music-reco-bpm{font-size:11px;color:var(--gray);margin-top:2px;font-family:'Orbitron',monospace}
+.result-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-action{padding:12px 24px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:'Inter',sans-serif}
+.btn-primary{background:var(--green);color:var(--bg);border:none}
+.btn-primary:hover{box-shadow:var(--glow);transform:translateY(-1px)}
+.btn-secondary{background:transparent;color:var(--green);border:2px solid var(--green)}
+.btn-secondary:hover{background:rgba(0,255,136,0.08)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+@media(max-width:600px){
+  .topbar{padding:12px 18px}
+  .hero{padding:50px 20px 36px}
+  .form-grid{grid-template-columns:1fr}
+  .form-group.full{grid-column:1}
+  .main{padding:0 14px 60px}
+}
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div class="app">
+  <div class="topbar">
+    <div class="logo">MOODSTREAM.AI</div>
+    <div class="topbar-badge">GEMINI 2.0 FLASH</div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-tag">⚡ Powered by Google Gemini AI</div>
+    <div class="hero-title">Agenda Musical<br/>Intelligent</div>
+    <div class="hero-sub">Décrivez votre établissement et générez un programme musical optimisé par IA, adapté à chaque moment de votre journée.</div>
+    <div class="powered-badge">🤖 <span>Propulsé par Gemini 2.0 Flash</span> — Google AI</div>
+  </div>
+
+  <div class="main">
+    <div class="section-tag"><div class="section-tag-text">01 — IDENTITÉ DE L'ÉTABLISSEMENT</div><div class="section-tag-line"></div></div>
+    <div class="glass-card">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Secteur d'activité</label>
+          <select class="form-select" id="secteur">
+            <option value="">Choisir...</option>
+            <option>Restauration</option><option>Commerce de détail</option><option>Hôtellerie</option>
+            <option>Bien-être & Beauté</option><option>Sport & Fitness</option><option>Bureau & Coworking</option>
+            <option>Santé & Médical</option><option>Événementiel</option><option>Autre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Type d'établissement</label>
+          <input class="form-input" id="type-etab" placeholder="Ex: Restaurant italien, Salon de coiffure..."/>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Nom de l'établissement (optionnel)</label>
+          <input class="form-input" id="nom-etab" placeholder="Ex: Le Petit Bistro, Studio Zen..."/>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-tag"><div class="section-tag-text">02 — AMBIANCE & IDENTITÉ</div><div class="section-tag-line"></div></div>
+    <div class="glass-card">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Ambiance cible</label>
+          <div class="chips" id="ambiances">
+            <div class="chip" onclick="toggleChip(this)">Détendu & Convivial</div>
+            <div class="chip" onclick="toggleChip(this)">Énergique & Motivant</div>
+            <div class="chip" onclick="toggleChip(this)">Élégant & Premium</div>
+            <div class="chip" onclick="toggleChip(this)">Romantique & Intime</div>
+            <div class="chip" onclick="toggleChip(this)">Festif & Dynamique</div>
+            <div class="chip" onclick="toggleChip(this)">Zen & Apaisant</div>
+            <div class="chip" onclick="toggleChip(this)">Professionnel & Neutre</div>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Intensité sonore souhaitée</label>
+          <div class="slider-wrap">
+            <input type="range" class="slider" id="intensite" min="1" max="5" value="3" oninput="updateSlider(this)"/>
+            <div class="slider-labels"><span>Très doux</span><span id="intensite-val">Modéré</span><span>Très fort</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-tag"><div class="section-tag-text">03 — PROFIL CLIENT</div><div class="section-tag-line"></div></div>
+    <div class="glass-card">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Tranche d'âge principale</label>
+          <div class="chips" id="ages">
+            <div class="chip" onclick="toggleChip(this)">18–25 ans</div>
+            <div class="chip" onclick="toggleChip(this)">25–35 ans</div>
+            <div class="chip" onclick="toggleChip(this)">35–50 ans</div>
+            <div class="chip" onclick="toggleChip(this)">50+ ans</div>
+            <div class="chip" onclick="toggleChip(this)">Familial (tous âges)</div>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Profil clientèle</label>
+          <div class="chips" id="profils">
+            <div class="chip" onclick="toggleChip(this)">Grand public</div>
+            <div class="chip" onclick="toggleChip(this)">CSP+</div>
+            <div class="chip" onclick="toggleChip(this)">Jeunes actifs</div>
+            <div class="chip" onclick="toggleChip(this)">Touristes internationaux</div>
+            <div class="chip" onclick="toggleChip(this)">Professionnels B2B</div>
+            <div class="chip" onclick="toggleChip(this)">Passionnés / Connaisseurs</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-tag"><div class="section-tag-text">04 — HORAIRES D'ACTIVITÉ</div><div class="section-tag-line"></div></div>
+    <div class="glass-card">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Ouverture</label>
+          <input type="time" class="form-input" id="heure-ouv" value="09:00"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fermeture</label>
+          <input type="time" class="form-input" id="heure-ferm" value="22:00"/>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Moments de pic d'activité</label>
+          <div class="chips" id="pics">
+            <div class="chip" onclick="toggleChip(this)">Petit-déjeuner (7h–10h)</div>
+            <div class="chip" onclick="toggleChip(this)">Brunch (10h–13h)</div>
+            <div class="chip" onclick="toggleChip(this)">Déjeuner (12h–14h)</div>
+            <div class="chip" onclick="toggleChip(this)">Après-midi (14h–17h)</div>
+            <div class="chip" onclick="toggleChip(this)">Happy Hour (17h–19h)</div>
+            <div class="chip" onclick="toggleChip(this)">Dîner (19h–22h)</div>
+            <div class="chip" onclick="toggleChip(this)">Soirée (22h–02h)</div>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Événements spéciaux récurrents (optionnel)</label>
+          <input class="form-input" id="events" placeholder="Ex: Brunch dominical, Soirée jazz vendredi..."/>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-generate" id="btn-gen" onclick="generateReport()">
+      ⚡ ANALYSER & GÉNÉRER MON AGENDA MUSICAL
+    </button>
+
+    <div class="error-panel" id="error-panel"></div>
+
+    <div class="loading-panel" id="loading">
+      <div class="loading-icon">🎵</div>
+      <div class="loading-title">ANALYSE EN COURS</div>
+      <div class="loading-sub" id="loading-sub">Connexion à Gemini AI...</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+      <div class="progress-steps" id="progress-steps">0%</div>
+    </div>
+
+    <div class="result-panel" id="result-panel">
+      <div class="result-header">
+        <div class="result-title" id="result-title">AGENDA MUSICAL</div>
+        <div class="result-sub" id="result-sub"></div>
+        <div class="gemini-mention">🤖 Généré par Gemini 2.0 Flash</div>
+      </div>
+      <div class="score-grid" id="score-grid"></div>
+      <div class="agenda-grid" id="agenda-grid"></div>
+      <div class="result-actions">
+        <button class="btn-action btn-primary" onclick="copyReport()">📋 Copier le rapport</button>
+        <button class="btn-action btn-secondary" onclick="resetForm()">🔄 Nouvelle analyse</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Canvas particles ── */
+const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
+let particles=[];
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+function initParticles(){
+  particles=[];
+  const count=Math.floor((canvas.width*canvas.height)/15000);
+  for(let i=0;i<count;i++) particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-0.5)*0.4,vy:(Math.random()-0.5)*0.4,r:Math.random()*2+0.5});
+}
+function drawParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0||p.x>canvas.width)p.vx*=-1;
+    if(p.y<0||p.y>canvas.height)p.vy*=-1;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle='rgba(0,255,136,0.5)';ctx.fill();
+  });
+  particles.forEach((p,i)=>{
+    particles.slice(i+1).forEach(q=>{
+      const d=Math.hypot(p.x-q.x,p.y-q.y);
+      if(d<120){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle=`rgba(0,255,136,${(1-d/120)*0.15})`;ctx.lineWidth=0.5;ctx.stroke();}
+    });
+  });
+  requestAnimationFrame(drawParticles);
+}
+resizeCanvas();initParticles();drawParticles();
+window.addEventListener('resize',()=>{resizeCanvas();initParticles();});
+
+/* ── UI helpers ── */
+const intensiteLabels=['','Très doux','Doux','Modéré','Fort','Très fort'];
+function updateSlider(el){
+  document.getElementById('intensite-val').textContent=intensiteLabels[el.value];
+  const pct=((el.value-1)/4)*100;
+  el.style.background=`linear-gradient(90deg,#00ff88 ${pct}%,rgba(0,255,136,0.15) ${pct}%)`;
+}
+updateSlider(document.getElementById('intensite'));
+function toggleChip(el){el.classList.toggle('sel');}
+function getChips(id){return[...document.querySelectorAll(`#${id} .chip.sel`)].map(c=>c.textContent).join(', ');}
+function showError(msg){
+  const el=document.getElementById('error-panel');
+  el.textContent='⚠️ '+msg;
+  el.classList.add('show');
+}
+function hideError(){document.getElementById('error-panel').classList.remove('show');}
+
+const MUSIC_ICONS={'Jazz':'🎷','Lounge':'🛋️','Pop':'🎤','Électronique':'🎛️','House':'🏠','R&B / Soul':'🎸','Classique':'🎻','Bossa Nova':'🌴','Indie':'🎵','Rock':'🎸','Hip-Hop':'🎧','Ambient':'🌊','World Music':'🌍','Funk':'🕺','Deep House':'🎚️','Nu Jazz':'🎺','Chillout':'😌','Downtempo':'🌙'};
+
+/* ── Main generation ── */
+async function generateReport(){
+  hideError();
+  const secteur=document.getElementById('secteur').value;
+  const typeEtab=document.getElementById('type-etab').value.trim();
+  if(!secteur&&!typeEtab){showError("Veuillez indiquer votre secteur ou type d'établissement.");return;}
+
+  const btn=document.getElementById('btn-gen');
+  btn.disabled=true;
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('result-panel').classList.remove('show');
+
+  const steps=[[15,'Analyse du profil établissement...'],[35,'Étude de la clientèle cible...'],[55,'Calibrage des ambiances par période...'],[80,'Sélection musicale par Gemini AI...'],[95,'Finalisation du rapport...'],[100,'Rapport prêt !']];
+  let si=0;
+  const interval=setInterval(()=>{
+    if(si>=steps.length){clearInterval(interval);return;}
+    const[pct,msg]=steps[si++];
+    document.getElementById('progress-bar').style.width=pct+'%';
+    document.getElementById('progress-steps').textContent=pct+'%';
+    document.getElementById('loading-sub').textContent=msg;
+  },700);
+
+  const data={
+    secteur,typeEtab,
+    nom:document.getElementById('nom-etab').value,
+    ambiances:getChips('ambiances'),
+    intensite:intensiteLabels[document.getElementById('intensite').value],
+    ages:getChips('ages'),
+    profils:getChips('profils'),
+    ouv:document.getElementById('heure-ouv').value,
+    ferm:document.getElementById('heure-ferm').value,
+    pics:getChips('pics'),
+    events:document.getElementById('events').value,
+  };
+
+  const prompt=`Tu es expert en musicologie appliquée aux espaces commerciaux. Génère un agenda musical pour cet établissement.
+
+Établissement : ${data.nom||data.typeEtab||data.secteur}
+Secteur : ${data.secteur}
+Type : ${data.typeEtab}
+Ambiance souhaitée : ${data.ambiances||'Non spécifié'}
+Intensité sonore : ${data.intensite}
+Clientèle : ${data.ages||'Mixte'}, ${data.profils||'Grand public'}
+Horaires : ${data.ouv} → ${data.ferm}
+Pics d'activité : ${data.pics||'Non spécifié'}
+Événements : ${data.events||'Aucun'}
+
+IMPORTANT : Pour chaque période, donne UN SEUL type de musique conseillé (le plus adapté), pas une liste.
+
+Retourne UNIQUEMENT du JSON valide sans markdown :
+{"etablissement":"nom","score_ambiance":85,"score_coherence":90,"score_experience":88,"resume":"Stratégie musicale en une phrase","periodes":[{"nom":"Nom période","horaire":"09:00 - 12:00","mood":"Descripteur émotionnel court","description":"2-3 phrases sur l ambiance et l objectif","type_musique":"UN seul type de musique ex: Jazz Lounge","bpm":"90-110 BPM","raison":"Pourquoi ce type de musique est le plus adapté en 1 phrase"}]}
+Génère 3 à 4 périodes adaptées aux horaires.`;
+
+  try{
+    /* Appel via la Netlify Function — la clé API reste côté serveur */
+    const response=await fetch('/.netlify/functions/gemini',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt})
+    });
+
+    const result=await response.json();
+    clearInterval(interval);
+    document.getElementById('progress-bar').style.width='100%';
+
+    if(!response.ok||result.error){
+      throw new Error(result.error||'Erreur lors de la génération.');
+    }
+
+    await new Promise(r=>setTimeout(r,400));
+    const text=result.result;
+    const clean=text.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(clean);
+    showResult(parsed,data);
+  }catch(e){
+    clearInterval(interval);
+    console.error(e);
+    showError(e.message||'Erreur lors de la génération. Réessaie.');
+  }finally{
+    btn.disabled=false;
+    document.getElementById('loading').classList.remove('show');
+  }
+}
+
+function showResult(data,input){
+  document.getElementById('result-title').textContent=`AGENDA — ${(data.etablissement||input.typeEtab||input.secteur).toUpperCase()}`;
+  document.getElementById('result-sub').textContent=data.resume||'';
+  document.getElementById('score-grid').innerHTML=[
+    ['Score Ambiance',data.score_ambiance,'🎵'],
+    ['Cohérence',data.score_coherence,'🎯'],
+    ['Expérience client',data.score_experience,'⭐'],
+    ['Périodes générées',(data.periodes||[]).length,'📅'],
+  ].map(([label,val,icon])=>`<div class="score-card"><div style="font-size:22px;margin-bottom:6px">${icon}</div><div class="score-val">${typeof val==='number'&&val<=100?val+'%':val}</div><div class="score-label">${label}</div></div>`).join('');
+
+  const emojis=['🌅','☀️','🌆','🌙'];
+  document.getElementById('agenda-grid').innerHTML=(data.periodes||[]).map((p,i)=>{
+    const icon=MUSIC_ICONS[p.type_musique]||'🎵';
+    return `<div class="period-card" style="animation-delay:${i*0.1}s">
+      <div class="period-header">
+        <div><div class="period-time">⏱ ${p.horaire}</div><div class="period-name">${p.nom}</div></div>
+        <div style="font-size:28px">${emojis[i]||'🎵'}</div>
+      </div>
+      <div class="period-mood">${p.mood}</div>
+      <div class="period-desc">${p.description}</div>
+      <div class="music-reco">
+        <div class="music-reco-icon">${icon}</div>
+        <div>
+          <div class="music-reco-label">Type de musique conseillé</div>
+          <div class="music-reco-type">${p.type_musique}</div>
+          ${p.bpm?`<div class="music-reco-bpm">BPM : ${p.bpm}</div>`:''}
+        </div>
+      </div>
+      ${p.raison?`<div style="margin-top:12px;font-size:12px;color:#6b8a7a;font-style:italic">💡 ${p.raison}</div>`:''}
+    </div>`;
+  }).join('');
+
+  document.getElementById('result-panel').classList.add('show');
+  document.getElementById('result-panel').scrollIntoView({behavior:'smooth'});
+  window._reportData=data;
+}
+
+function copyReport(){
+  if(!window._reportData)return;
+  const d=window._reportData;
+  let text=`AGENDA MUSICAL — ${d.etablissement}\n${d.resume}\n\n`;
+  (d.periodes||[]).forEach(p=>{
+    text+=`${p.horaire} — ${p.nom}\nAmbiance : ${p.mood}\n${p.description}\nMusique conseillée : ${p.type_musique} (${p.bpm})\n${p.raison}\n\n`;
+  });
+  navigator.clipboard.writeText(text).then(()=>alert('Rapport copié !'));
+}
+
+function resetForm(){
+  document.getElementById('result-panel').classList.remove('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
