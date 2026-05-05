@@ -3,9 +3,9 @@ exports.handler = async function(event, context) {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+  const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
-  if (!GEMINI_API_KEY) {
+  if (!ANTHROPIC_API_KEY) {
     return { statusCode: 500, body: JSON.stringify({ error: 'Clé API manquante côté serveur.' }) };
   }
 
@@ -36,19 +36,19 @@ exports.handler = async function(event, context) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Prompt manquant.' }) };
   }
 
-  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-
   try {
-    const response = await fetch(GEMINI_URL, {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 1500,
-          responseMimeType: "application/json"
-        }
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1500,
+        system: 'Tu es expert en musicologie appliquée aux espaces commerciaux. Tu réponds UNIQUEMENT en JSON valide, sans markdown, sans texte avant ou après.',
+        messages: [{ role: 'user', content: prompt }]
       })
     });
 
@@ -58,11 +58,11 @@ exports.handler = async function(event, context) {
       return {
         statusCode: response.status,
         headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ error: data.error?.message || 'Erreur Gemini.' })
+        body: JSON.stringify({ error: data.error?.message || 'Erreur API Claude.' })
       };
     }
 
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const text = data.content?.[0]?.text || '';
 
     return {
       statusCode: 200,
