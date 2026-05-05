@@ -326,7 +326,28 @@ async function generateReport(){
   let si=0;
   const interval=setInterval(()=>{if(si>=steps.length){clearInterval(interval);return;}const[pct,msg]=steps[si++];document.getElementById('progress-bar').style.width=pct+'%';document.getElementById('progress-pct').textContent=pct+'%';document.getElementById('loading-sub').textContent=msg;},700);
   const data={secteur,typeEtab,nom:document.getElementById('nom-etab').value,ambiances:getChips('ambiances'),intensite:iLabels[document.getElementById('intensite').value],ages:getChips('ages'),profils:getChips('profils'),ouv:document.getElementById('heure-ouv').value,ferm:document.getElementById('heure-ferm').value,pics:getChips('pics'),events:document.getElementById('events').value};
-  const prompt=`Tu es expert en musicologie appliquée aux espaces commerciaux. Génère un agenda musical pour cet établissement.\n\nÉtablissement : ${data.nom||data.typeEtab||data.secteur}\nSecteur : ${data.secteur}\nType : ${data.typeEtab}\nAmbiance souhaitée : ${data.ambiances||'Non spécifié'}\nIntensité sonore : ${data.intensite}\nClientèle : ${data.ages||'Mixte'}, ${data.profils||'Grand public'}\nHoraires : ${data.ouv} → ${data.ferm}\nPics d'activité : ${data.pics||'Non spécifié'}\nÉvénements : ${data.events||'Aucun'}\n\nIMPORTANT : Pour chaque période, donne UN SEUL type de musique conseillé.\n\nRetourne UNIQUEMENT du JSON valide sans markdown :\n{"etablissement":"nom","score_ambiance":85,"score_coherence":90,"score_experience":88,"resume":"Stratégie musicale en une phrase","periodes":[{"nom":"Nom période","horaire":"09:00 - 12:00","mood":"Descripteur émotionnel court","description":"2-3 phrases","type_musique":"UN seul type","bpm":"90-110 BPM","raison":"Pourquoi en 1 phrase"}]}\nGénère 3 à 4 périodes adaptées aux horaires.`;
+  const STYLES_DISPONIBLES = ["Happy hour – Ibiza Chill House", "Samba Brazil, Dance Party", "Elegant Bar", "Party!", "Summertime", "Valentine's Day, The Power of Love", "Soft Christmas", "Piano Solo", "Gypsy", "Reggae", "Acoustic Pop and Folk", "Soulful House", "Organica", "EDM", "Future Rave", "Tropical House", "Crooners", "Country", "Garage House", "Nu Disco", "Vintage Style", "Deep House", "Gym Warm Up", "Smooth and Elegant Vocals", "Deep", "Nature Sounds: Birds", "Latin", "Urban and Latin Wave", "Reggaeton", "Traditional European", "Bossa Nova", "House & Tribal", "Halloween Mood", "Stay Positive!", "Yoga and Meditation", "Elegant", "Background for Office", "Coffee, Please!", "Just Instrumentals Pop", "Women Soft Voices", "Alternative Sounds", "SPA Chillout", "Chillout Vibes", "SPA Selection", "Lounge Vocals", "Urban and RnB", "Ballad and Soft Rock", "Adult Pop", "Cool Rooftop", "Electronic Just Instrumentals", "Soft Songs & Lullaby for Children", "Instrumental Songs for Children", "Happy Children", "Nature Sounds: Birds and Small Animals", "Nature Sounds: Rain", "Nature Sounds: Sea, Oceans and Rivers", "Lo Fi", "Dynamic Pop", "Just Instrumentals", "New Age, Zen, SPA Music", "Warm and Soft Songs", "Just Ladies", "Soul, Black and Blues", "Pop Rock and Indie Rock", "Classical", "Jazz", "Christmas Time", "Lounge and Chill Out", "Music for Fitness, Dance and Electronic", "Pop Music"];
+
+  const prompt=`Tu es expert en musicologie appliquée aux espaces commerciaux. Génère un agenda musical pour cet établissement.
+
+Établissement : ${data.nom||data.typeEtab||data.secteur}
+Secteur : ${data.secteur}
+Type : ${data.typeEtab}
+Ambiance souhaitée : ${data.ambiances||'Non spécifié'}
+Intensité sonore : ${data.intensite}
+Clientèle : ${data.ages||'Mixte'}, ${data.profils||'Grand public'}
+Horaires : ${data.ouv} → ${data.ferm}
+Pics d'activité : ${data.pics||'Non spécifié'}
+Événements : ${data.events||'Aucun'}
+
+IMPORTANT : Tu dois OBLIGATOIREMENT choisir le type de musique UNIQUEMENT parmi cette liste de styles disponibles :
+${STYLES_DISPONIBLES.join(', ')}
+
+Pour chaque période, choisis UN SEUL style de cette liste, celui qui correspond le mieux à l'ambiance souhaitée. N'invente aucun autre style.
+
+Retourne UNIQUEMENT du JSON valide sans markdown :
+{"etablissement":"nom","score_ambiance":85,"score_coherence":90,"score_experience":88,"resume":"Stratégie musicale en une phrase","periodes":[{"nom":"Nom période","horaire":"09:00 - 12:00","mood":"Descripteur émotionnel court","description":"2-3 phrases","type_musique":"Style exact de la liste","bpm":"90-110 BPM","raison":"Pourquoi ce style est le plus adapté en 1 phrase"}]}
+Génère 3 à 4 périodes adaptées aux horaires.`;
   try{
     const response=await fetch('/.netlify/functions/gemini',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt,token:sessionToken})});
     const result=await response.json();
